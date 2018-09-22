@@ -1,0 +1,5 @@
+tester Cleartext-Password := "tester"
+       F5-LTM-User-Role = 900,
+       F5-LTM-User-Info-1 = mgmt,
+       F5-LTM-User-Partition = Common,
+       F5-LTM-User-Shell = disable

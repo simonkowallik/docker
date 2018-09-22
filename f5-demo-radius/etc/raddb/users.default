@@ -1,0 +1,30 @@
+# radius test user
+test Cleartext-Password := "test"
+
+# User Role: Administrator
+smith Cleartext-Password := "agent"
+       F5-LTM-User-Role = 0,
+       F5-LTM-User-Info-1 = mgmt,
+       F5-LTM-User-Partition = all,
+       F5-LTM-User-Shell = tmsh
+
+# this should illustrate that you cannot use 'admin' via remote Authentication, the internal admin user is always preferred
+admin Cleartext-Password := "secret"
+       F5-LTM-User-Role = 0,
+       F5-LTM-User-Info-1 = mgmt,
+       F5-LTM-User-Partition = all,
+       F5-LTM-User-Shell = tmsh
+
+# User Role: Guest
+viewer Cleartext-Password := "viewer"
+       F5-LTM-User-Role = 700,
+       F5-LTM-User-Info-1 = mgmt,
+       F5-LTM-User-Partition = Common,
+       F5-LTM-User-Shell = disable
+
+# User Role: No-Access
+noaccess Cleartext-Password := "noaccess"
+       F5-LTM-User-Role = 900,
+       F5-LTM-User-Info-1 = mgmt,
+       F5-LTM-User-Partition = Common,
+       F5-LTM-User-Shell = disable
