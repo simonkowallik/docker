@@ -8,18 +8,35 @@ It is intended for use in testing and demo environments and should not be used i
 - The list of pre-defined users and F5 User Roles is configured in `etc/raddb/users.default`. The entry on the left of `Cleartext-Password` is the username, the entry on the right of `Cleartext-Password :=` is the password (excluding "")
 - if you want to add users see further below for an example (add custom user database)
 
+pre-defined `users:passwords`:
+
+    test:test
+    smith:agent
+    admin:secret
+    viewer:viewer
+    noaccess:noaccess
+
+# quickstart guide
+
+run container, save container IP address to \$containerip and run radtest to verify functionality
+
+    docker run -p 1812:1812/udp --name f5-demo-radius simonkowallik/f5-demo-radius
+
+    docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' \
+        f5-demo-radius | read containerip
+    docker exec -it f5-demo-radius radtest test test $containerip 0 SECRET
+
+
 # docker image
 
-## download from docker hub
+download from docker hub:
 
     docker pull simonkowallik/f5-demo-radius:latest
 
-
-## create your own image
-
-download this directory and run docker build:
+To create your own image download this directory and run docker build:
 
     docker build -t my/f5-demo-radius .
+
 
 # start container and bind port 1812/udp to host machine
 from docker hub:
@@ -29,6 +46,7 @@ from docker hub:
 from a local image:
 
     docker run -p 1812:1812/udp --name f5-demo-radius my/f5-demo-radius
+
 
 # test functionality
 
@@ -108,4 +126,3 @@ For F5 setup information check:
 [https://support.f5.com/csp/article/K14324](https://support.f5.com/csp/article/K14324)
 
     tmsh modify /auth remote-role role-info add { mgmt_group { attribute "F5-LTM-User-Info-1=mgmt" console %F5-LTM-User-Shell line-order 1001 role %F5-LTM-User-Role user-partition %F5-LTM-User-Partition } }
-
