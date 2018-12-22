@@ -1,0 +1,14 @@
+{
+  "name": "demo-node-fileupload",
+  "version": "1.0.0",
+  "description": "simple fileupload demo",
+  "author": "",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.16.4",
+    "express-fileupload": "^1.0.0"
+  }
+}
