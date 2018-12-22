@@ -1,6 +1,7 @@
 FROM node:10-alpine
 
-COPY app /
+RUN mkdir /app
+ADD app/* /app/
 WORKDIR /app
 RUN npm install
 
