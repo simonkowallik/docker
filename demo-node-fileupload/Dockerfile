@@ -1,7 +1,7 @@
 FROM node:10-alpine
 
+COPY ,/app ./
 WORKDIR /app
-COPY app ./
 RUN npm install
 
 EXPOSE 80
