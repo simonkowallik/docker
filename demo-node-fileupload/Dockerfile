@@ -1,8 +1,7 @@
-FROM node:10-alpine
+FROM node:lts-alpine
 
-RUN mkdir /app
-ADD app/* /app/
 WORKDIR /app
+COPY ./app/* ./
 RUN npm install
 
 EXPOSE 80
