@@ -5,7 +5,7 @@ ARG AS3_SCHEMA_VALIDATIOR_VERSION=3.5.1
 WORKDIR /build
 
 RUN apk add --no-cache --virtual .build-deps curl unzip && \
-    curl -fsSLO https://github.com/F5Networks/f5-appsvcs-extension/raw/master/AS3-schema-validator/${AS3_SCHEMA_VALIDATIOR_VERSION}/build.zip <https://github.com/F5Networks/f5-appsvcs-extension/raw/master/AS3-schema-validator/$%7bAS3_SCHEMA_VALIDATIOR_VERSION%7d/build.zip>  && \
+    curl -fsSLO https://github.com/F5Networks/f5-appsvcs-extension/raw/master/AS3-schema-validator/${AS3_SCHEMA_VALIDATIOR_VERSION}/build.zip && \
     unzip -d / build.zip && \
     rm -f build.zip && \
     npm install -g serve && \
