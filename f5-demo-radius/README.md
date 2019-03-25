@@ -1,4 +1,5 @@
 # intro
+[![](https://images.microbadger.com/badges/image/simonkowallik/f5-demo-radius.svg)](https://microbadger.com/images/simonkowallik/f5-demo-radius)
 
 This container provides a pre-configured freeradius server for use with F5 BIG-IP Remote Authentication or F5 BIG-IP APM.
 It is intended for use in testing and demo environments and should not be used in production environments.

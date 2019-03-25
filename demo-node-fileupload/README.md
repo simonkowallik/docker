@@ -1,4 +1,6 @@
 # intro
+[![](https://images.microbadger.com/badges/image/simonkowallik/demo-node-fileupload.svg)](https://microbadger.com/images/simonkowallik/demo-node-fileupload)
+
 super simple web app using node to receive multipart/form-data file uploads.
 
 # build docker image
@@ -19,4 +21,4 @@ response:
 
 	filename:file.txt, mimetype:text/plain, truncated:false, length:2, md5:50585be4e3159a71c874c590d2ba12ec
 
- or point your browser to http://<containerip>:8080/upload
+ or point your browser to `http://<containerip>:8080/upload`

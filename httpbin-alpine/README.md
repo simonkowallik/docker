@@ -1,6 +1,6 @@
-[![](https://images.microbadger.com/badges/image/simonkowallik/httpbin-alpine.svg)](https://microbadger.com/images/simonkowallik/httpbin-alpine "Get your own image badge on microbadger.com")
-
 # intro
+[![](https://images.microbadger.com/badges/image/simonkowallik/httpbin-alpine.svg)](https://microbadger.com/images/simonkowallik/httpbin-alpine)
+
 This docker image implements httpbin on alpine linux.
 
 # What is httpbin
