@@ -1,6 +1,7 @@
-FROM alpine:3.8
+FROM alpine:3.9
 
 RUN apk update --no-cache; \
+    apk upgrade; \
     apk add tini freeradius freeradius-radclient && \
       rm -rf /var/cache/apk/*; \
       sed -ie 's/^root::/root:!:/' /etc/shadow; \
