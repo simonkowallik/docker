@@ -1,0 +1,8 @@
+dist: xenial
+language: minimal
+
+services: docker
+
+before_script: ./_ci/prepare-tests.sh
+
+script: ./_ci/run-tests.sh
