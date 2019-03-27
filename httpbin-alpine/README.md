@@ -1,5 +1,7 @@
 # intro
 [![](https://images.microbadger.com/badges/image/simonkowallik/httpbin-alpine.svg)](https://microbadger.com/images/simonkowallik/httpbin-alpine)
+[![Build Status](https://travis-ci.com/simonkowallik/docker.svg?branch=master)](https://travis-ci.com/simonkowallik/docker)
+
 
 This docker image implements httpbin on alpine linux.
 
