@@ -21,4 +21,10 @@ This image is built on the master branch of httpbin, hence always uses the lates
 
 # How to use it
 
-    docker run -p 80:80 simonkowallik/httpbin-alpine
+```
+docker run -p 80:80 simonkowallik/httpbin-alpine
+```
+
+# problems / ideas?
+If you have any problems or ideas, let me know!
+Just open a [github issue](https://github.com/simonkowallik/docker/issues).
