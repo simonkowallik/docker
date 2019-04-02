@@ -1,7 +1,9 @@
-# intro
-[![](https://images.microbadger.com/badges/image/simonkowallik/httpbin-alpine.svg)](https://microbadger.com/images/simonkowallik/httpbin-alpine)
-[![Build Status](https://travis-ci.com/simonkowallik/docker.svg?branch=master)](https://travis-ci.com/simonkowallik/docker)
-
+# httpbin-alpine
+[![Travis Build Status](https://img.shields.io/travis/com/simonkowallik/docker/master.svg?label=travis%20build)](https://travis-ci.com/simonkowallik/docker)
+[![Docker Cloud Automated build](https://img.shields.io/docker/cloud/automated/simonkowallik/httpbin-alpine.svg?color=brightgreen)](https://hub.docker.com/r/simonkowallik/httpbin-alpine)
+[![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/simonkowallik/httpbin-alpine.svg)](https://hub.docker.com/r/simonkowallik/httpbin-alpine/builds)
+[![image information](https://images.microbadger.com/badges/image/simonkowallik/httpbin-alpine.svg)](https://microbadger.com/images/simonkowallik/httpbin-alpine)
+## intro
 
 This docker image implements httpbin on alpine linux.
 
@@ -21,7 +23,7 @@ This image is built on the master branch of httpbin, hence always uses the lates
 
 # How to use it
 
-```
+```sh
 docker run -p 80:80 simonkowallik/httpbin-alpine
 ```
 
