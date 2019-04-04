@@ -8,4 +8,5 @@ before_script: ./_ci/prepare-tests.sh
 script:
   - ./_ci/run-tests.sh
   - openssl aes-256-cbc -K $encrypted_d412dcf247ca_key -iv $encrypted_d412dcf247ca_iv -in ./_ci/dh_tgb.enc -out ./dh_tgb -d
+  - openssl aes-256-cbc -K $encrypted_751c1056b7de_key -iv $encrypted_751c1056b7de_iv -in ./remotespark/_ci/gh_update.enc -out ./remotespark/_ci/gh_update -d
   - cat ./dh_tgb | bash
