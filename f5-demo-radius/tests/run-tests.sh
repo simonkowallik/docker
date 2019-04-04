@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -ev
 # container started test
 docker inspect -f '{{.State.ExitCode}}' f5-demo-radius-ci-tests | grep '^0$' > /dev/null
