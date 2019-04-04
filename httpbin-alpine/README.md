@@ -7,26 +7,26 @@
 
 This docker image implements httpbin on alpine linux.
 
-# What is httpbin
+## What is httpbin
 httpbin is a simple HTTP Request & Response Service.
 
 See: [httpbin.org](https://httpbin.org) and [github.com/postmanlabs/httpbin](https://github.com/postmanlabs/httpbin)
 
-# What is alpine
+## What is alpine
 Alpine Linux is a Linux distribution based on musl and BusyBox, primarily designed for security, simplicity, and resource efficiency.
 It is very famous and widely used for leightweight docker images.
 
 See: [alpinelinux.org](https://alpinelinux.org) and [alpine on hub.docker.com](https://hub.docker.com/_/alpine)
 
-# What httpbin version is used?
+## What httpbin version is used?
 This image is built on the master branch of httpbin, hence always uses the latest code.
 
-# How to use it
+## How to use it
 
 ```sh
 docker run -p 80:80 simonkowallik/httpbin-alpine
 ```
 
-# problems / ideas?
+## problems / ideas?
 If you have any problems or ideas, let me know!
 Just open a [github issue](https://github.com/simonkowallik/docker/issues).
