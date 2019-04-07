@@ -11,7 +11,10 @@ do
   docker ps --format '{{.Names}}' | grep "remotespark-embedded-${ver}" || exit 1
 done
 
-countdown=5
+# overview
+docker ps --format 'table {{.Names}}\t{{.Status}}'
+
+countdown=180 # 15 min
 while [[ "$(docker ps --format '{{.Names}}\t{{.Status}}' | grep remotespark | grep -v '(healthy)' | wc -l)" != "0" ]]
 do
   sleep 5
@@ -19,6 +22,6 @@ do
 
   docker ps --format 'table {{.Names}}\t{{.Status}}' | grep remotespark | grep -v '(healthy)'
 
-  # countdown reached above docker container didnt became healthy in time
+  # countdown reached above docker container didn't become healthy in time
   [[ "$countdown" == "0" ]] && exit 1
-done
+done || true

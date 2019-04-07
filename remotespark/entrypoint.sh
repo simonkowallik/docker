@@ -15,6 +15,9 @@ then
     #https://www.remotespark.com/view/5.5/SparkGateway.zip
 
     # SPARK_VERSION <- Dockerfile ENV
+    [[ "$SPARK_VERSION" == "$(cat /LATEST_SPARK_VERSION)" ]] && \
+      echo -e "\n* notice: version ${SPARK_VERSION} is 'latest', using 'latest' instead\n" && \
+      SPARK_VERSION="latest" ; \
     [[ "$SPARK_VERSION" == "latest" ]] && SPARKVER="" || SPARKVER="${SPARK_VERSION}/";
     
     url="https://www.remotespark.com/view/${SPARKVER}SparkGateway.zip"
