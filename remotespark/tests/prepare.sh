@@ -26,5 +26,5 @@ do
   docker run --rm -d --health-cmd 'curl -f localhost' --name remotespark-nonembedded-${ver} remotespark-nonembedded:${ver}
 
   docker build -t remotespark-embedded:${ver} --build-arg SPARK_VERSION=${ver} --build-arg EMBED=true .
-  docker run --rm -d --health-cmd 'curl -f localhost' --name remotespark-embedded-${ver} remotespark:${ver}
+  docker run --rm -d --health-cmd 'curl -f localhost' --name remotespark-embedded-${ver} remotespark-embedded:${ver}
 done
