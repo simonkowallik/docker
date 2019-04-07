@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # prepare.sh
 set -ev
 docker build -t f5-demo-radius-ci-tests $1
