@@ -1,4 +1,4 @@
-FROM alpine:3.9
+FROM alpine:3.10
 
 LABEL name="httpbin"
 LABEL description="A simple HTTP service."
