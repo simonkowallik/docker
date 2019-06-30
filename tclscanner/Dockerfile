@@ -1,8 +1,8 @@
 FROM python:3.7
 
 LABEL org.label-schema.name="tclscanner" \
-      org.label-schema.description="wrapping container for tclscan" \
-      org.label-schema.vcs-url="https://github.com/simonkowallik/docker/tclscanner" \
+      org.label-schema.description="wrapper for tclscan" \
+      org.label-schema.vcs-url="https://github.com/simonkowallik/docker" \
       org.label-schema.vendor="Simon Kowallik"
 
 ENV TCLSCAN_REPO="https://github.com/aidanhs/tclscan.git"
