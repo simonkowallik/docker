@@ -1,0 +1,220 @@
+diff -ruN tclscan.orig/Cargo.toml tclscan/Cargo.toml
+--- tclscan.orig/Cargo.toml	2019-06-16 20:12:17.341625573 +0200
++++ tclscan/Cargo.toml	2019-06-16 20:13:36.012057476 +0200
+@@ -3,17 +3,16 @@
+ name = "tclscan"
+ version = "0.0.1"
+ authors = ["Aidan Hobson Sayers <aidanhs@cantab.net>"]
++build = "src/build.rs"
++
++[build-dependencies]
++bindgen = "= 0.49.2"
+
+ [dependencies]
+-docopt = "0.6.62"
+-docopt_macros = "0.6.62"
++docopt = "= 1.1.0"
+ enum_primitive = "0.0.2"
+-num = "0.1.24"
+-rustc-serialize = "0.3.14"
+-
+-[dependencies.bindgen]
+-git = "https://github.com/crabtw/rust-bindgen.git"
+-branch = "master"
++num = "= 0.1.42"
++rustc-serialize = "= 0.3.24"
+
+ [[bin]]
+
+diff -ruN tclscan.orig/src/build.rs tclscan/src/build.rs
+--- tclscan.orig/src/build.rs	1970-01-01 01:00:00.000000000 +0100
++++ tclscan/src/build.rs	2019-06-16 20:13:36.012801604 +0200
+@@ -0,0 +1,25 @@
++extern crate bindgen;
++
++//use std::env;
++//use std::path::PathBuf;
++
++fn main() {
++    // Tell cargo to tell rustc to link the lib tcl8.4
++    println!("cargo:rustc-link-lib=tcl8.4");
++
++    // The bindgen::Builder is the main entry point
++    // to bindgen, and lets you build up options for
++    // the resulting bindings.
++    let bindings = bindgen::Builder::default()
++        // The input header we would like to generate
++        // bindings for.
++        .header("src/mytcl.h")
++        // Finish the builder and generate the bindings.
++        .generate()
++        // Unwrap the Result and panic on failure.
++        .expect("Unable to generate bindings");
++
++    bindings
++        .write_to_file("src/tcl.rs")
++        .expect("Couldn't write bindings!");
++}
+diff -ruN tclscan.orig/src/lib.rs tclscan/src/lib.rs
+--- tclscan.orig/src/lib.rs	2019-06-16 20:12:17.342220712 +0200
++++ tclscan/src/lib.rs	2019-06-16 20:13:36.014080962 +0200
+@@ -1,8 +1,6 @@
+-#![feature(core)]
+-#![feature(collections)]
++#![feature(rustc_private)]
+ #![feature(libc)]
+ #![feature(slice_patterns)]
+-#![feature(str_char)]
+
+ extern crate libc;
+ // https://github.com/rust-lang/rust/issues/16920
+@@ -15,7 +13,7 @@
+ use rstcl::TokenType;
+
+ pub mod rstcl;
+-#[allow(dead_code, non_upper_case_globals, non_camel_case_types, non_snake_case, raw_pointer_derive)]
++#[allow(dead_code, non_upper_case_globals, non_camel_case_types, non_snake_case)]
+ mod tcl;
+
+ // http://www.tcl.tk/doc/howto/stubs.html
+@@ -39,8 +37,8 @@
+ impl<'b> fmt::Display for CheckResult<'b> {
+     fn fmt<'a>(&'a self, f: &mut fmt::Formatter) -> fmt::Result {
+         return match self {
+-            &Warn(ctx, msg, line) => write!(f, "WARN: {} at `{}` in `{}`", msg, line, ctx),
+-            &Danger(ctx, msg, line) => write!(f, "DANGER: {} at `{}` in `{}`", msg, line, ctx),
++            &Warn(ctx, msg, line) => write!(f, "WARNING: message:{} element:{} code:{}", msg, line, ctx),
++            &Danger(ctx, msg, line) => write!(f, "DANGEROUS: message:{} element:{} code:{}", msg, line, ctx),
+         };
+     }
+ }
+@@ -56,7 +54,10 @@
+ fn check_literal<'a, 'b>(ctx: &'a str, token: &'b rstcl::TclToken<'a>) -> Vec<CheckResult<'a>> {
+     let token_str = token.val;
+     assert!(token_str.len() > 0);
+-    return if token_str.char_at(0) == '{' {
++    // https://stackoverflow.com/a/44081208
++    // char_at(0) -> chars().nth(0)
++    // https://users.rust-lang.org/t/comparing-str-chars-nth-1-to-char/11077
++    return if token_str.chars().nth(0) == Some('{') {
+         vec![]
+     } else if token_str.contains('$') {
+         vec![Danger(ctx, "Expected literal, found $", token_str)]
+@@ -166,7 +167,7 @@
+             let mut param_types = vec![Code::Block];
+             if tokens.len() == 3 || tokens.len() == 4 {
+                 let new_params: Vec<Code> = iter::repeat(Code::Literal).take(tokens.len()-2).collect();
+-                param_types.push_all(&new_params);
++                param_types.extend_from_slice(&new_params);
+             }
+             param_types
+         }
+@@ -185,7 +186,7 @@
+             let mut param_types = vec![Code::Expr, Code::Block];
+             let mut i = 3;
+             while i < tokens.len() {
+-                param_types.push_all(&match tokens[i].val {
++                param_types.extend_from_slice(&match tokens[i].val {
+                     "elseif" => vec![Code::Literal, Code::Expr, Code::Block],
+                     "else" => vec![Code::Literal, Code::Block],
+                     _ => { break; },
+diff -ruN tclscan.orig/src/main.rs tclscan/src/main.rs
+--- tclscan.orig/src/main.rs	2019-06-16 20:12:17.342420310 +0200
++++ tclscan/src/main.rs	2019-06-16 20:13:36.014958248 +0200
+@@ -1,5 +1,4 @@
+ #![feature(plugin)]
+-#![plugin(docopt_macros)]
+
+ extern crate rustc_serialize;
+ extern crate docopt;
+@@ -14,17 +13,23 @@
+ use tclscan::rstcl;
+ use tclscan::CheckResult;
+
+-docopt!(Args derive Debug, "
+-Usage: tclscan check [--no-warn] ( - | <path> )
+-       tclscan parsestr ( - | <script-str> )
+-");
+-
+ pub fn main() {
+-    let args: Args = Args::docopt().decode().unwrap_or_else(|e| e.exit());
+-    let take_stdin = args.cmd__;
+-    let script_in = match (args.cmd_check, args.cmd_parsestr, take_stdin) {
++    let args = Docopt::new("
++Usage: tclscan check [--no-warn] ( [-] | <path> )
++       tclscan parsestr ( [-] | <script-str> )
++")
++        .and_then(|d| d.parse())
++        .unwrap_or_else(|e| e.exit());
++    let args_cmd_check = args.get_bool("check");
++    let args_cmd_parsestr = args.get_bool("parsestr");
++    let args_stdin = args.get_bool("-");
++    let args_arg_path = args.get_str("<path>");
++    let args_arg_script_str = args.get_str("<script-str>");
++    let args_flag_no_warn = args.get_bool("--no-warn");
++
++    let script_in = match (args_cmd_check, args_cmd_parsestr, args_stdin) {
+         (true, false, false) => {
+-            let path = Path::new(&args.arg_path);
++            let path = Path::new(&args_arg_path);
+             let path_display = path.display();
+             let mut file = match fs::File::open(&path) {
+                 Err(err) => panic!("ERROR: Couldn't open {}: {}",
+@@ -47,14 +52,14 @@
+                 Ok(_) => stdin_content,
+             }
+         },
+-        (false, true, false) => args.arg_script_str,
++        (false, true, false) => args_arg_script_str.to_string(),
+         _ => panic!("Internal error: could not load script"),
+     };
+     let script = &script_in;
+-    match (args.cmd_check, args.cmd_parsestr) {
++    match (args_cmd_check, args_cmd_parsestr) {
+         (true, false) => {
+             let mut results = tclscan::scan_script(script);
+-            if args.flag_no_warn {
++            if args_flag_no_warn {
+                 results = results.into_iter().filter(|r|
+                     match r { &CheckResult::Warn(_, _, _) => false,  _ => true }
+                 ).collect();
+diff -ruN tclscan.orig/src/mytcl.h tclscan/src/mytcl.h
+--- tclscan.orig/src/mytcl.h	2019-06-16 20:12:17.342645171 +0200
++++ tclscan/src/mytcl.h	2019-06-16 20:13:36.015701087 +0200
+@@ -1,2 +1,2 @@
+ //#define USE_TCL_STUBS
+-#include "/usr/include/tcl/tcl.h"
++#include "/usr/include/tcl.h"
+diff -ruN tclscan.orig/src/rstcl.rs tclscan/src/rstcl.rs
+--- tclscan.orig/src/rstcl.rs	2019-06-16 20:12:17.343014556 +0200
++++ tclscan/src/rstcl.rs	2019-06-16 20:14:00.401860283 +0200
+@@ -273,7 +273,7 @@
+             parse_args => panic!("Don't know how to parse {:?}", parse_args),
+         };
+         if parsed != 0 {
+-            println!("WARN: couldn't parse {}", string);
++            println!("UNPARSABLE: couldn't parse {}", string.replace("\n", ""));
+             return (TclParse { comment: Some(""), command: Some(""), tokens: vec![] }, "");
+         }
+         let tokens = make_tokens(string, string_start, &parse);
+@@ -323,9 +323,9 @@
+ fn count_tokens(token: &TclToken) -> usize {
+     token.tokens.iter().map(|t| count_tokens(t)).sum::<usize>() + 1
+ }
+-
++// tcl.rs: Tcl_Token _type -> type_
+ fn make_tcltoken<'a>(tcl_token: &tcl::Tcl_Token, tokenval: &'a str, acc: &mut Vec<TclToken<'a>>) {
+-    let token_type: TokenType = TokenType::from_usize(tcl_token._type as usize).unwrap();
++    let token_type: TokenType = TokenType::from_usize(tcl_token.type_ as usize).unwrap();
+     let num_subtokens = tcl_token.numComponents as usize;
+
+     let subtokens = match token_type {
+@@ -353,7 +353,7 @@
+             vec![]
+         },
+         Command => {
+-            assert!(tokenval.char_at(0) == '[');
++            assert!(tokenval.chars().nth(0) == Some('['));
+             assert!(num_subtokens == 0);
+             vec![]
+         },
