@@ -26,10 +26,12 @@ See: [tclscan](https://github.com/aidanhs/tclscan) and [wiki.tcl-lang.org/page/d
 
 ## How to use it
 
-Have a look at the help file of tclscanner first:
+First have a look at the help file of tclscanner:
 ```sh
 docker run --rm -i simonkowallik/tclscanner tclscanner.py --help
 
+...
+... DISCLAIMER ...
 ...
 
 usage: tclscanner.py [-h] [-d DIRECTORY]
@@ -48,12 +50,12 @@ optional arguments:
                         stdout)
 ```
 
-Then run:
+Once you read, understood and agree with the `DISCLAIMER` (from the command above), proceed with the command presented:
 ```sh
 docker run -i --name my_tclscanner simonkowallik/tclscanner COMMAND
 ```
 
-Once you ran the container successfully, you can save it as a docker image for future use:
+You can save it as a docker image for future use with this command:
 ```sh
 docker commit <container> <my_image_name>
 docker commit my_tclscanner my/tclscanner
@@ -64,11 +66,11 @@ Optionally delete the container:
 docker container rm my_tclscanner
 ```
 
-For a simple test just run the container in interactive mode (`-i`), this will run tclscanner.py with default options against three test files:
+For a simple test just run the container in interactive mode (`-i`), this will run tclscanner.py with default options against three test files included in the container's `/scandir`:
 ```sh
 docker run --rm -i my/tclscanner tclscanner.py | jq .
 ```
-This will produce the following json outout:
+This will produce the following json outout which gives you an idea of the report format:
 ```json
 {
   "./dangerous.tcl": {
@@ -98,7 +100,7 @@ This will produce the following json outout:
 }
 ```
 
-### Run tclscanner against your own tcl code
+### Run tclscanner with your own tcl code
 
 For example scan all files in directory `$HOME/mytclcode`:
 ```sh
