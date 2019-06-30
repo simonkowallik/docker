@@ -17,26 +17,21 @@ tclscan is a tool written in rust lang to scan tcl code for [potentially dangero
 
 See: [tclscan](https://github.com/aidanhs/tclscan) and [wiki.tcl-lang.org/page/double+substitution](https://wiki.tcl-lang.org/page/double+substitution)
 
+## What is tclscanner
+`tclscanner` is a wrapper for `tclscan` written in python 3. It processes many tcl source code files at once, copies them one-by-one to temporary files in the container and reformats them to `tclscan` to work best. Then it generates a report in json format based on the `tclscan` results.
+
+`tclscanner.py` walks a given directory recursively and scans all files, by default this is the current working directory `.`. The `tclscanner` container uses `/scandir` within the container as the default directory, hence it is advised to map your source code repo to `/scandir` (see examples below).
+
+`tclscanner.py` can be limited to specific file extensions, again see below for examples.
+
 ## How to use it
 
-Run:
+Have a look at the help file of tclscanner first:
 ```sh
-docker run -i --name my_tclscanner -v /path/to/tcl/source/files:/scandir:ro simonkowallik/tclscanner
-```
+docker run --rm -i simonkowallik/tclscanner tclscanner.py --help
 
-The above command starts the container interactively and will provide you with further instructions (and a disclaimer) on how to run it.
+...
 
-`-v /path/to/tcl/source/files:/scandir:ro` maps your local directory `/path/to/tcl/source/files` to `/scandir` within the container. `:ro` instructs it to mount it read-only for additional safety (even though files will not be modified).
-
-Once you started the container successfully, you can also save it as a docker image for future use:
-```sh
-docker commit <container> <my_image_name>
-docker commit my_tclscanner my/tclscanner
-```
-
-You can invoke `tclscanner.py` directly with:
-```sh
-docker run --rm -i my/tclscanner tclscanner.py --help
 usage: tclscanner.py [-h] [-d DIRECTORY]
                      [-f [FILE_EXTENSIONS [FILE_EXTENSIONS ...]]]
                      [--code-convert-only CODE_CONVERT_ONLY]
@@ -53,9 +48,71 @@ optional arguments:
                         stdout)
 ```
 
-For example scan all files with extensions `tcl` and `txt` in directory `$HOME/mytclcode`:
+Then run:
 ```sh
-docker run --rm -i -v $HOME/mytclcode:/scandir:ro my/tclscanner tclscanner.py --directory /scandir --file-extensions tcl txt
+docker run -i --name my_tclscanner simonkowallik/tclscanner COMMAND
+```
+
+Once you ran the container successfully, you can save it as a docker image for future use:
+```sh
+docker commit <container> <my_image_name>
+docker commit my_tclscanner my/tclscanner
+```
+
+Optionally delete the container:
+```sh
+docker container rm my_tclscanner
+```
+
+For a simple test just run the container in interactive mode (`-i`), this will run tclscanner.py with default options against three test files:
+```sh
+docker run --rm -i my/tclscanner tclscanner.py | jq .
+```
+This will produce the following json outout:
+```json
+{
+  "./dangerous.tcl": {
+    "errors": [],
+    "warnings": [
+      "Unquoted expr element:1 code:expr 1 + $one",
+      "Unquoted expr element:+ code:expr 1 + $one"
+    ],
+    "dangerous": [
+      "Dangerous unquoted expr element:$one code:expr 1 + $one"
+    ]
+  },
+  "./ok.tcl": {
+    "errors": [],
+    "warnings": [],
+    "dangerous": []
+  },
+  "./warning.tcl": {
+    "errors": [],
+    "warnings": [
+      "Unquoted expr element:1 code:expr 1 + 1",
+      "Unquoted expr element:+ code:expr 1 + 1",
+      "Unquoted expr element:1 code:expr 1 + 1"
+    ],
+    "dangerous": []
+  }
+}
+```
+
+### Run tclscanner against your own tcl code
+
+For example scan all files in directory `$HOME/mytclcode`:
+```sh
+docker run --rm -i -v $HOME/mytclcode:/scandir:ro my/tclscanner tclscanner.py
+```
+
+Scan only files with extensions `tcl` and `txt` in directory `$HOME/mytclcode`:
+```sh
+docker run --rm -i -v $HOME/mytclcode:/scandir:ro my/tclscanner tclscanner.py --file-extensions tcl txt
+```
+
+Limit the scan to a subdirectory of `$HOME/projects`:
+```sh
+docker run --rm -i -v $HOME/projects:/scandir:ro my/tclscanner tclscanner.py --file-extensions tcl txt --directory ./tclsourcecode
 ```
 
 ## problems / ideas?
