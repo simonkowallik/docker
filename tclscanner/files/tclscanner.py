@@ -53,6 +53,7 @@ def singleline_replace(content: str) -> str:
         line = line.replace("matches_glob", "eq")
         line = line.replace("matches_regex", "eq")
         line = line.replace("call", "")
+        line = line.replace("switch", "$switch")
         line = line.replace("static::", "static__")
         line = re.sub(r"^(\s*timing\s+[OoNnFf]{2,3})$", r"set \1", line)
         line = re.sub(r"^(\s*priority\s+\d+)$", r"set \1", line)
