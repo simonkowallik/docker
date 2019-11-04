@@ -1,6 +1,6 @@
 # docker images
 [![Travis Build Status](https://img.shields.io/travis/com/simonkowallik/docker/master.svg?label=travis%20build)](https://travis-ci.com/simonkowallik/docker)
-[![Last commit](https://img.shields.io/github/last-commit/simonkowallik/homebrew-f5.svg?color=brightgreen)](https://github.com/simonkowallik/homebrew-f5)
+[![Last commit](https://img.shields.io/github/last-commit/simonkowallik/docker.svg?color=brightgreen)](https://github.com/simonkowallik/docker)
 
 ## info
 This repository contains various Dockerfiles, check the directories for details.
