@@ -62,4 +62,4 @@ RUN apk update --no-cache; \
             vim \
             ;
 
-CMD ["/bin/bash"]
+CMD ["sleep", "infinity"]
