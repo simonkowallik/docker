@@ -5,16 +5,7 @@ cd remotespark
 
 set -v
 
-# fetching letsencrypt intermediates we can get and building trusted CA chain as remotespark doesnt sent the intermediate
-echo | openssl s_client -connect letsencrypt.org:443 -showcerts > le.pem && \
-curl -L https://letsencrypt.org/certs/lets-encrypt-x3-cross-signed.pem.txt \
-        https://letsencrypt.org/certs/letsencryptauthorityx3.pem.txt \
-        https://letsencrypt.org/certs/lets-encrypt-x4-cross-signed.pem.txt \
-        https://letsencrypt.org/certs/letsencryptauthorityx4.pem.txt \
-        > le-intermediates.pem && \
-cat /etc/ssl/certs/ca-certificates.crt le-intermediates.pem le.pem >> ./chain.pem
-
-curl --cacert ./chain.pem -fLO https://www.remotespark.com/view/SparkGateway.zip
+curl -fLO https://www.remotespark.com/view/SparkGateway.zip
 
 mkdir -p ./SparkGateway
 unzip -n SparkGateway.zip -d ./SparkGateway
