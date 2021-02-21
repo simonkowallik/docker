@@ -5,7 +5,15 @@ cd remotespark
 
 set -v
 
-curl -fLO https://www.remotespark.com/view/SparkGateway.zip
+curl -L \
+        https://letsencrypt.org/certs/lets-encrypt-e2.pem \
+        https://letsencrypt.org/certs/lets-encrypt-r4-cross-signed.pem \
+        https://letsencrypt.org/certs/lets-encrypt-e1.pem \
+        https://letsencrypt.org/certs/lets-encrypt-r3.pem \
+        https://letsencrypt.org/certs/lets-encrypt-r3-cross-signed.pem \
+        > le-intermediates.pem
+  
+curl --cacert ./le-intermediates.pem -fLO https://www.remotespark.com/view/SparkGateway.zip
 
 mkdir -p ./SparkGateway
 unzip -n SparkGateway.zip -d ./SparkGateway

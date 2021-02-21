@@ -1,4 +1,4 @@
-FROM openjdk:13-alpine
+FROM openjdk:17-alpine
 
 # to add RemoteSpark software version 5.6 to the image during build run:
 # docker build --build-arg SPARK_VERSION=5.6 --build-arg EMBED=true .
@@ -21,14 +21,16 @@ RUN apk add --update --no-cache curl openssl && \
   mkdir /usr/local/bin/SparkGateway && \
   echo -e "\n* WORKAROUND: fetching letsencrypt intermediates we can get and building trusted CA chain as remotespark doesnt sent the intermediate :(\n" && \
   echo | openssl s_client -connect letsencrypt.org:443 -showcerts > le.pem && \
-  curl -L https://letsencrypt.org/certs/lets-encrypt-x3-cross-signed.pem.txt \
-          https://letsencrypt.org/certs/letsencryptauthorityx3.pem.txt \
-          https://letsencrypt.org/certs/lets-encrypt-x4-cross-signed.pem.txt \
-          https://letsencrypt.org/certs/letsencryptauthorityx4.pem.txt \
+  curl -L \
+          https://letsencrypt.org/certs/lets-encrypt-e2.pem \
+          https://letsencrypt.org/certs/lets-encrypt-r4-cross-signed.pem \
+          https://letsencrypt.org/certs/lets-encrypt-e1.pem \
+          https://letsencrypt.org/certs/lets-encrypt-r3.pem \
+          https://letsencrypt.org/certs/lets-encrypt-r3-cross-signed.pem \
           > le-intermediates.pem && \
   cat /etc/ssl/certs/ca-certificates.crt le-intermediates.pem le.pem >> /usr/local/bin/SparkGateway/chain.pem && \
   echo -e "\n* starting actual docker build tasks\n"; \
-  rm -f /opt/openjdk-13/lib/src.zip; \
+  rm -f /opt/openjdk*/lib/src.zip; \
   [[ "$SPARK_VERSION" == "$(cat /LATEST_SPARK_VERSION)" ]] && \
     echo -e "\n* notice: version ${SPARK_VERSION} is 'latest', using 'latest' instead\n" && \
     SPARK_VERSION="latest" ; \
@@ -44,7 +46,8 @@ RUN apk add --update --no-cache curl openssl && \
   [[ "$EMBED" == "true" ]] && \
       [[ ! -f /usr/local/bin/SparkGateway/SparkGateway.jar ]] && exit 1; \
   [[ "$EMBED" == "false" ]] && \
-      echo -e "\n* Test availability for RemoteSpark Gateway version:$SPARK_VERSION from url:$url\n" && \
+      echo -e "\n* Test availability for RemoteSpark Gateway version:$SPARK_VERSION from url:$url\n \
+      If the version isnt available at the above URL the docker build will fail.\n\n" && \
       curl -I $url --cacert /usr/local/bin/SparkGateway/chain.pem 2>/dev/null | head -1 | grep -v '200 OK' && exit 1; \
   rm -rf /tmp/build;
 
