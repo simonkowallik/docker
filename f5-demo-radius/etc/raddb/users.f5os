@@ -3,7 +3,10 @@ f5osrootlike Cleartext-Password := "root"
        F5-F5OS-HOMEDIR = /var/F5/system,
        F5-F5OS-USERINFO = "This is a root-like user with full f5sh, API and bash access",
        F5-F5OS-GID = admin,
-       F5-F5OS-SECONDARYGIDS = "superuser"
+       F5-F5OS-SECONDARYGIDS = "9004"
+# NOTE: make sure to use the GID ID for F5-F5OS-SECONDARYGIDS!
+# NOTE: multiple secondary GIDS can be specified:
+#       F5-F5OS-SECONDARYGIDS = "9004,9001"
 
 # an operator-like remote user
 f5osoperator Cleartext-Password := "operator"
