@@ -109,5 +109,6 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-          repository: simonkowallik/${{ matrix.container }}
+          repository: simonkowallik/docker
           #short-description: ${{ github.event.repository.description }}
+          readme-filepath: ${{ matrix.container }}/README.md
