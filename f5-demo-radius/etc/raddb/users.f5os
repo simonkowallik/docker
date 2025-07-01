@@ -1,0 +1,11 @@
+# a root like remote user
+f5osrootlike Cleartext-Password := "root"
+       F5-F5OS-HOMEDIR = /var/F5/system,
+       F5-F5OS-USERINFO = "This is a root-like user with full f5sh, API and bash access",
+       F5-F5OS-GID = admin,
+       F5-F5OS-SECONDARYGIDS = "superuser"
+
+# an operator-like remote user
+f5osoperator Cleartext-Password := "operator"
+       F5-F5OS-USERINFO = "Ops!",
+       F5-F5OS-GID = operator

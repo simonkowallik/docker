@@ -1,0 +1,113 @@
+name: Release Container Images
+  
+on:
+  workflow_dispatch:
+  release:
+    types: [released]
+
+jobs:
+  discover-containers:
+    runs-on: ubuntu-latest
+    outputs:
+      containers: ${{ steps.discover.outputs.containers }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Discover containers with .auto-build-deploy
+        id: discover
+        run: |
+          containers=()
+          for dir in */; do
+            if [[ -f "${dir}.auto-build-deploy" && -f "${dir}Dockerfile" ]]; then
+              container_name="${dir%/}"
+              containers+=("\"$container_name\"")
+            fi
+          done
+          
+          if [ ${#containers[@]} -eq 0 ]; then
+            echo "No containers with .auto-build-deploy files found"
+            echo "containers=[]" >> $GITHUB_OUTPUT
+          else
+            container_json="[$(IFS=','; echo "${containers[*]}")]"
+            echo "Found containers: $container_json"
+            echo "containers=$container_json" >> $GITHUB_OUTPUT
+          fi
+
+  build-and-push:
+    needs: discover-containers
+    if: ${{ needs.discover-containers.outputs.containers != '[]' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+    strategy:
+      matrix:
+        container: ${{ fromJson(needs.discover-containers.outputs.containers) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels)
+        id: metadata
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+              docker.io/simonkowallik/${{ matrix.container }}
+              ghcr.io/simonkowallik/${{ matrix.container }}
+          tags: |
+              type=raw,value=latest,enable={{is_default_branch}}
+              type=schedule,pattern={{date 'YYYYMMDD-HHmmss' tz='UTC'}}
+              type=pep440,pattern={{major}}.{{minor}}.{{patch}}
+              type=pep440,pattern={{version}}
+              type=pep440,pattern={{major}}
+              type=sha
+              
+      - name: Build and push
+        id: push
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.container }}
+          platforms: linux/amd64,linux/arm64
+          file: ${{ matrix.container }}/Dockerfile
+          push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          tags: ${{ steps.metadata.outputs.tags }}
+          labels: ${{ steps.metadata.outputs.labels }}
+
+      - name: Generate artifact attestation
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-name: ghcr.io/simonkowallik/${{ matrix.container }}
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: true
+          
+      - name: Docker Hub Description
+        uses: peter-evans/dockerhub-description@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+          repository: simonkowallik/${{ matrix.container }}
+          #short-description: ${{ github.event.repository.description }}

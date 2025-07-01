@@ -1,11 +1,20 @@
-FROM alpine:3.11
+FROM alpine:latest
 
 RUN apk update --no-cache; \
     apk upgrade; \
-    apk add tini freeradius freeradius-radclient && \
-      rm -rf /var/cache/apk/*; \
-      sed -ie 's/^root::/root:!:/' /etc/shadow; \
-      echo '$INCLUDE /etc/raddb/users.default' >> /etc/raddb/mods-config/files/authorize; \
+    apk add \
+        vim \
+        bash \
+        freeradius \
+        freeradius-lib \
+        freeradius-radclient \
+        ;
+
+RUN rm -rf /var/cache/apk/*;
+
+RUN sed -ie 's/^root::/root:!:/' /etc/shadow; \
+      echo '$INCLUDE /etc/raddb/users.f5-bigip-tmos' >> /etc/raddb/mods-config/files/authorize; \
+      echo '$INCLUDE /etc/raddb/users.f5os' >> /etc/raddb/mods-config/files/authorize; \
       echo '$INCLUDE /etc/raddb/users.custom' >> /etc/raddb/mods-config/files/authorize; \
       touch /etc/raddb/users.custom; \
       rm -f /etc/raddb/sites-enabled/inner-tunnel; \
@@ -17,5 +26,4 @@ EXPOSE \
     1812/udp \
     1813/udp
 
-ENTRYPOINT ["/sbin/tini", "--"]
 CMD ["radiusd","-ftxl", "stdout"]

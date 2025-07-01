@@ -1,4 +1,3 @@
-# radius test user
 test Cleartext-Password := "test"
 
 # User Role: Administrator

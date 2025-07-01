@@ -1,15 +1,14 @@
 # f5-demo-radius
-[![Travis Build Status](https://img.shields.io/travis/com/simonkowallik/docker/master.svg?label=travis%20build)](https://travis-ci.com/simonkowallik/docker)
-[![Docker Cloud Automated build](https://img.shields.io/docker/cloud/automated/simonkowallik/f5-demo-radius.svg?color=brightgreen)](https://hub.docker.com/r/simonkowallik/f5-demo-radius)
-[![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/simonkowallik/f5-demo-radius.svg)](https://hub.docker.com/r/simonkowallik/f5-demo-radius/builds)
-[![image information](https://images.microbadger.com/badges/image/simonkowallik/f5-demo-radius.svg)](https://microbadger.com/images/simonkowallik/f5-demo-radius)
+
 ## intro
-This container provides a pre-configured freeradius server for use with F5 BIG-IP Remote Authentication or F5 BIG-IP APM.
+
+This container provides a pre-configured freeradius server for use with F5 BIG-IP Remote Authentication, F5 BIG-IP APM and F5OS.
 It is intended for use in testing and demo environments and should not be used in production environments.
 
 ## details
-- Any client IP address is accepted by the radius server, the secret is `SECRET` (see: etc/raddb/clients.conf)
-- The list of pre-defined users and F5 User Roles is configured in `etc/raddb/users.default`. The entry on the left of `Cleartext-Password` is the username, the entry on the right of `Cleartext-Password :=` is the password (excluding "")
+
+- Any client IP address is accepted by the radius server, the secret is `SECRET` (see: `etc/raddb/clients.conf`)
+- The list of pre-defined users and F5 User Roles is configured in `etc/raddb/users.f5-bigip-tmos`. The entry on the left of `Cleartext-Password` is the username, the entry on the right of `Cleartext-Password :=` is the password (excluding "")
 - if you want to add users see further below for an example (add custom user database)
 
 pre-defined `users:passwords`:
@@ -24,9 +23,9 @@ pre-defined `users:passwords`:
 
 ## quickstart guide
 
-run container, save container IP address to \$containerip and run radtest to verify functionality
+run container, save container IP address to `$containerip` and run radtest to verify functionality
 
-```
+```bash
 docker run -p 1812:1812/udp --name f5-demo-radius simonkowallik/f5-demo-radius
 
 docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' \
@@ -38,26 +37,26 @@ docker exec -it f5-demo-radius radtest test test $containerip 0 SECRET
 
 download from docker hub:
 
-```
+```bash
 docker pull simonkowallik/f5-demo-radius:latest
 ```
 
 To create your own image download this directory and run docker build:
 
-```
+```bash
 docker build -t my/f5-demo-radius .
 ```
 
 ## start container and bind port 1812/udp to host machine
 from docker hub:
 
-```
+```bash
 docker run -p 1812:1812/udp --name f5-demo-radius simonkowallik/f5-demo-radius
 ```
 
 from a local image:
 
-```
+```bash
 docker run -p 1812:1812/udp --name f5-demo-radius my/f5-demo-radius
 ```
 
@@ -65,18 +64,19 @@ docker run -p 1812:1812/udp --name f5-demo-radius my/f5-demo-radius
 
 You can use radtest (shipped in the container) to test the container functionality.
 
-```
+```bash
 docker exec -it <containername> radtest <user> <password> <container-ip> 0 SECRET
 ```
 
 Get the container IP address and store it in \$containerip:
 
-```
+```bash
 docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' f5-demo-radius | read containerip
 ```
 
 Use radtest with thest user credentials:
-```
+
+```bash
 docker exec -it f5-demo-radius radtest test test $containerip 0 SECRET
 
 Sent Access-Request Id 161 from 0.0.0.0:53840 to 172.17.0.2:1812 length 74
@@ -90,7 +90,8 @@ Received Access-Accept Id 161 from 172.17.0.2:1812 to 172.17.0.2:53840 length 20
 ```
 
 The container should log something similar to:
-```
+
+```bash
 (0) Received Access-Request Id 161 from 172.17.0.2:53840 to 172.17.0.2:1812 length 74
 (0)   User-Name = "test"
 (0)   User-Password = "test"
@@ -108,23 +109,17 @@ The container should log something similar to:
 
 ## configure the F5 BIG-IP
 
-Create radius f5-demo-radius server
-```
+```bash
+# Create radius f5-demo-radius server
 tmsh create /auth radius-server f5-demo-radius server \$ipaddress-of-your-dockerhost secret SECRET
-```
 
-Add f5-demo-radius to radius auth servers
-```
+# Add f5-demo-radius to radius auth servers
 tmsh create /auth radius system-auth servers add { f5-demo-radius }
-```
 
-Change authenication source to radius
-```
+# Change authenication source to radius
 tmsh modify /auth source type radius
-```
 
-Add remote role
-```
+#Add remote role
 tmsh modify /auth remote-role role-info add { mgmt_group { attribute "F5-LTM-User-Info-1=mgmt" console %F5-LTM-User-Shell line-order 1001 role %F5-LTM-User-Role user-partition %F5-LTM-User-Partition } }
 ```
 
@@ -134,11 +129,13 @@ use a local user file like `./my.users.custom` and map it to the container file 
 
 Example:
 
+```bash
     docker run -p 1812:1812/udp -v $PWD/my.users.custom:/etc/raddb/users.custom --name f5-demo-radius simonkowallik/f5-demo-radius
+```
 
 ## example authentication via F5 WebUI
 
-```
+```bash
 (0) Received Access-Request Id 226 from 172.17.0.1:50543 to <container-ip>:1812 length 91
 (0)   User-Name = "viewer"
 (0)   User-Password = "viewer"
